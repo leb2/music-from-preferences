@@ -21,11 +21,16 @@ class Visualization extends React.Component {
 
     componentDidMount() {
         const node = this.node;
+
+        // Setup panning
         select(node)
             .call(zoom().on("zoom", function () {
                 select(node).select('g').attr("transform", 'translate(' + d3.event.transform.x + ' 0)');
             }))
-            .append("g");
+            // Disable zooming
+            .on('wheel.zoom', null);
+
+        select(node).append('g');
         this.createVisualization();
     }
 

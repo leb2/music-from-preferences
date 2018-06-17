@@ -13,6 +13,8 @@ html, body {
   border-bottom: 1px solid #666;
   background: #FAFAFA;
   shape-rendering: crispEdges; }
+  #root svg:hover {
+    cursor: move; }
 
 rect {
   fill: #364651;
