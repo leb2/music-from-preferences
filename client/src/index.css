@@ -4,9 +4,6 @@ html, body {
   margin: 0;
   background: white; }
 
-* {
-  -webkit-transform: translateZ(0); }
-
 #root {
   padding-top: 100px; }
 

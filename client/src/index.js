@@ -3,17 +3,12 @@ import ReactDOM from 'react-dom';
 import { select } from 'd3-selection';
 import { transition } from 'd3-transition';
 import { easeLinear } from 'd3-ease';
+import { zoom } from 'd3-zoom';
+import * as d3 from 'd3';
 import './index.css';
 
 
-class DebugButton extends React.Component {
-    render() {
-        return <button onClick={this.props.onClick}>{this.props.text}</button>
-    }
-}
-
 class Visualization extends React.Component {
-
     constructor(props) {
         super(props);
         this.createVisualization = this.createVisualization.bind(this);
@@ -21,9 +16,16 @@ class Visualization extends React.Component {
         this.state = {
             data: [[1100, 1], [1200, 2], [1300, 3], [1400, 5], [1500,1]]
         };
+
     }
 
     componentDidMount() {
+        const node = this.node;
+        select(node)
+            .call(zoom().on("zoom", function () {
+                select(node).select('g').attr("transform", 'translate(' + d3.event.transform.x + ' 0)');
+            }))
+            .append("g");
         this.createVisualization();
     }
 
@@ -51,12 +53,12 @@ class Visualization extends React.Component {
         console.log("creating visualization");
         const node = this.node;
 
-        let rect = select(node).selectAll('rect')
+        let rect = select(node).select('g').selectAll('rect')
             .data(this.state.data);
         rect.exit().remove();
         let newNodes = rect.enter().append('rect');
 
-        select(node).selectAll('rect')
+        select(node).select('g').selectAll('rect')
             .attr('width', 50)
             .attr('height', 15)
             .attr('rx', 0)
@@ -65,7 +67,7 @@ class Visualization extends React.Component {
             .attr('x', (d) => {return d[0] - 100})
             .attr('y', (d) => {return d[1] * 25 + 100});
 
-        this.animateNodes(newNodes);
+        // this.animateNodes(newNodes);
 
             // .attr('x', (d) => {
             //     console.log("asdf");
@@ -75,12 +77,12 @@ class Visualization extends React.Component {
 
     pauseAnimation() {
         const node = this.node;
-        select(node).selectAll('rect').transition();
+        select(node).select('g').selectAll('rect').transition();
     }
 
     continueAnimation() {
         const node = this.node;
-        const allNodes = select(node).selectAll('rect');
+        const allNodes = select(node).select('g').selectAll('rect');
         this.animateNodes(allNodes);
     }
 
