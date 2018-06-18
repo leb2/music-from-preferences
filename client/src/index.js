@@ -8,13 +8,61 @@ import * as d3 from 'd3';
 import './index.css';
 
 
+// let sample = 'qteeicvu--zzygcjheg-tywkvgzf';
+let sample = 'qwer-tyuias-dfgh';
+
+
+class Note {
+    constructor(pitch, duration, onset) {
+        this.pitch = pitch;
+        this.duration = duration;
+        this.onset = onset;
+    }
+
+    static pitchFromChar(char) {
+        const pitches = '-qwertyuiasdfghasdfghjkzxcvbnm,';
+        const pitch = pitches.indexOf(char);
+        if (pitch === -1) {
+            throw char + ' is not a valid pitch character';
+        }
+        return pitch - 1;
+    }
+
+    static notesFromString(string, onset) {
+        const notes = [];
+        let prevChar = '-';
+        let currentOnset = onset;
+
+        for (let i = 0; i < string.length; i++) {
+            let char = string[i];
+
+            if (char == '-' && notes.length != 0) {
+                notes[notes.length - 1].duration += 1;
+
+            } else {
+                let pitch = Note.pitchFromChar(char);
+                let note = new Note(pitch, 1, currentOnset);
+                notes.push(note);
+            }
+            prevChar = char;
+            currentOnset += 1;
+        }
+        return notes
+    }
+}
+
+
 class Visualization extends React.Component {
     constructor(props) {
         super(props);
         this.createVisualization = this.createVisualization.bind(this);
 
+        let notes = Note.notesFromString(sample, 0);
+        console.log("here are the notes");
+        console.log(notes);
+
         this.state = {
-            data: [[1100, 1], [1200, 2], [1300, 3], [1400, 5], [1500,1]]
+            data: notes
         };
 
     }
@@ -28,6 +76,7 @@ class Visualization extends React.Component {
                 select(node).select('g').attr("transform", 'translate(' + d3.event.transform.x + ' 0)');
             }))
             // Disable zooming
+            .on('dblclick.zoom', null)
             .on('wheel.zoom', null);
 
         select(node).append('g');
@@ -62,22 +111,14 @@ class Visualization extends React.Component {
             .data(this.state.data);
         rect.exit().remove();
         let newNodes = rect.enter().append('rect');
-
-        select(node).select('g').selectAll('rect')
-            .attr('width', 50)
+        newNodes
             .attr('height', 15)
             .attr('rx', 0)
             .attr('ry', 0)
             .attr('stroke-width', "1px")
-            .attr('x', (d) => {return d[0] - 100})
-            .attr('y', (d) => {return d[1] * 25 + 100});
-
-        // this.animateNodes(newNodes);
-
-            // .attr('x', (d) => {
-            //     console.log("asdf");
-            //     return 0;
-            // });
+            .attr('width', (note) => {return (note.duration) * 100 - 5 })
+            .attr('x', (note) => {return (note.onset - 1) * 100})
+            .attr('y', (note) => {return (note.pitch) * 20 + 100});
     }
 
     pauseAnimation() {
@@ -92,9 +133,8 @@ class Visualization extends React.Component {
     }
 
     debug() {
-        let newData = this.state.data.slice();
         this.setState({
-            data: newData
+            data: this.state.data.concat(this.state.data)
         });
     }
 
