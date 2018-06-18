@@ -57,14 +57,11 @@ class Visualization extends React.Component {
         super(props);
         this.createVisualization = this.createVisualization.bind(this);
 
-        let notes = Note.notesFromString(sample, 0);
-        console.log("here are the notes");
-        console.log(notes);
+        this.chunks = [];
+        this.appendChunk(sample);
+        this.appendChunk(sample);
 
-        this.state = {
-            data: notes
-        };
-
+        this.state = {data: []};
     }
 
     componentDidMount() {
@@ -80,11 +77,32 @@ class Visualization extends React.Component {
             .on('wheel.zoom', null);
 
         select(node).append('g');
+        this.updateState();
         this.createVisualization();
+    }
+
+    appendChunk(noteString) {
+        let currentOffset = 0;
+        if (this.chunks.length != 0)  {
+            let lastChunk = this.chunks[this.chunks.length - 1];
+            let lastNote = lastChunk[lastChunk.length - 1];
+
+            currentOffset = lastNote.onset + lastNote.duration;
+        }
+
+        let notes = Note.notesFromString(noteString, currentOffset);
+        this.chunks.push(notes);
+        this.updateState();
     }
 
     componentDidUpdate() {
         this.createVisualization();
+    }
+
+    updateState() {
+        this.setState({
+            data: [].concat.apply([], this.chunks)
+        });
     }
 
     animateNodes(nodes) {
@@ -132,11 +150,16 @@ class Visualization extends React.Component {
         this.animateNodes(allNodes);
     }
 
-    debug() {
-        this.setState({
-            data: this.state.data.concat(this.state.data)
-        });
+    debug1() {
+        this.chunks.pop();
+        this.updateState();
     }
+
+    debug2() {
+        this.appendChunk(sample);
+        this.updateState();
+    }
+
 
     render() {
         return (
@@ -144,7 +167,8 @@ class Visualization extends React.Component {
                 <svg id="display" width="100%" height="100%" ref={node => this.node = node}/>
                 <button onClick={() => this.pauseAnimation()}>Pause</button>
                 <button onClick={() => this.continueAnimation()}>Continue</button>
-                <button onClick={() => this.debug()}>Debug</button>
+                <button onClick={() => this.debug1()}>Debug1</button>
+                <button onClick={() => this.debug2()}>Debug2</button>
             </div>
         );
     }
