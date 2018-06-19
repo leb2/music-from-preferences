@@ -9,7 +9,7 @@ import './index.css';
 
 
 // let sample = 'qteeicvu--zzygcjheg-tywkvgzf';
-let sample = 'qwer-tyuias-dfgh';
+let sample = 'qwer-tyuias-dfghfdyrw';
 
 
 class Note {
@@ -36,7 +36,7 @@ class Note {
         for (let i = 0; i < string.length; i++) {
             let char = string[i];
 
-            if (char == '-' && notes.length != 0) {
+            if (char === '-' && notes.length !== 0) {
                 notes[notes.length - 1].duration += 1;
 
             } else {
@@ -83,7 +83,7 @@ class Visualization extends React.Component {
 
     appendChunk(noteString) {
         let currentOffset = 0;
-        if (this.chunks.length != 0)  {
+        if (this.chunks.length !== 0)  {
             let lastChunk = this.chunks[this.chunks.length - 1];
             let lastNote = lastChunk[lastChunk.length - 1];
 
@@ -92,7 +92,6 @@ class Visualization extends React.Component {
 
         let notes = Note.notesFromString(noteString, currentOffset);
         this.chunks.push(notes);
-        this.updateState();
     }
 
     componentDidUpdate() {
@@ -108,15 +107,15 @@ class Visualization extends React.Component {
     animateNodes(nodes) {
         function repeat() {
             nodes.transition()
-                .duration(2000)
+                .duration(20 * 1000)
                 .ease(easeLinear)
                 .attr('x', function() {
                         let self = select(this);
                         let startX = self.attr('x');
-                        return startX - 500;
+                        return startX - 1000;
                     }
-                )
-                .on('end', repeat);
+                );
+                // .on('end', repeat);
         }
         repeat();
     }
@@ -129,13 +128,25 @@ class Visualization extends React.Component {
             .data(this.state.data);
         rect.exit().remove();
         let newNodes = rect.enter().append('rect');
+
+        let currentPixelOffset = 0;
+        let firstRect = select(node).select('g').select('rect');
+
+        if (!firstRect.empty()) {
+            let xAttr = firstRect.attr('x');
+            if (xAttr !== null) {
+                currentPixelOffset = parseFloat(xAttr);
+            }
+        }
+
+        const noteWidth = 30;
         newNodes
             .attr('height', 15)
             .attr('rx', 0)
             .attr('ry', 0)
             .attr('stroke-width', "1px")
-            .attr('width', (note) => {return (note.duration) * 100 - 5 })
-            .attr('x', (note) => {return (note.onset - 1) * 100})
+            .attr('width', (note) => {return (note.duration) * noteWidth - 5 })
+            .attr('x', (note) => {return (note.onset) * noteWidth + currentPixelOffset})
             .attr('y', (note) => {return (note.pitch) * 20 + 100});
     }
 
