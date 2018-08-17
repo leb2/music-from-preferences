@@ -76,7 +76,13 @@ class Visualization extends React.Component {
             .on('dblclick.zoom', null)
             .on('wheel.zoom', null);
 
-        select(node).append('g');
+        select(node).select('line')
+            .attr('style', 'stroke: rgb(230, 230, 230); stroke-width: 2');
+
+        select(node).select('g').select('g').select('rect')
+            .attr('x', 100)
+            .attr('width', 1000);
+
         this.updateState();
         this.createVisualization();
     }
@@ -175,7 +181,14 @@ class Visualization extends React.Component {
     render() {
         return (
             <div>
-                <svg id="display" width="100%" height="100%" ref={node => this.node = node}/>
+                <svg id="display" width="100%" height="100%" ref={node => this.node = node}>
+                    <g>
+                        <g>
+                            <rect height="100%" style={{fill: 'blue'}}/>
+                        </g>
+                    </g>
+                    <line x1="350px" y1="0" x2="350px" y2="100%"/>
+                </svg>
                 <button onClick={() => this.pauseAnimation()}>Pause</button>
                 <button onClick={() => this.continueAnimation()}>Continue</button>
                 <button onClick={() => this.debug1()}>Debug1</button>
